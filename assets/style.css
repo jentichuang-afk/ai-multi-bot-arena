@@ -1,0 +1,238 @@
+/* Import modern typography from Google Fonts */
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap');
+
+/* Apply custom styles to the whole Streamlit application */
+html, body, [data-testid="stAppViewContainer"] {
+    font-family: 'Outfit', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background-color: #0a0b10 !important;
+    background-image: 
+        radial-gradient(at 0% 0%, rgba(139, 92, 246, 0.05) 0px, transparent 50%),
+        radial-gradient(at 100% 100%, rgba(59, 130, 246, 0.05) 0px, transparent 50%) !important;
+    background-attachment: fixed !important;
+}
+
+/* Hide standard Streamlit header and footer for a cleaner app look */
+header, footer, [data-testid="stHeader"] {
+    visibility: hidden !important;
+    height: 0 !important;
+}
+
+/* Custom Glassmorphism Containers */
+.glass-card {
+    background: rgba(22, 25, 37, 0.6) !important;
+    backdrop-filter: blur(20px) !important;
+    -webkit-backdrop-filter: blur(20px) !important;
+    border: 1px solid rgba(255, 255, 255, 0.08) !important;
+    border-radius: 16px !important;
+    padding: 1.5rem !important;
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3) !important;
+    margin-bottom: 1.5rem !important;
+    transition: all 0.3s ease !important;
+}
+
+.glass-card:hover {
+    border: 1px solid rgba(139, 92, 246, 0.3) !important;
+    box-shadow: 0 8px 32px 0 rgba(139, 92, 246, 0.08) !important;
+}
+
+/* Chat bubble styling */
+.chat-container {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+    padding: 1rem 0;
+    width: 100%;
+}
+
+.chat-bubble {
+    display: flex;
+    gap: 0.85rem;
+    padding: 1.2rem;
+    border-radius: 20px;
+    max-width: 90%;
+    margin-bottom: 0.5rem;
+    animation: fadeInUp 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+    position: relative;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(12px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* User chat bubble */
+.chat-bubble.user-bubble {
+    align-self: flex-end;
+    background: linear-gradient(135deg, rgba(139, 92, 246, 0.25) 0%, rgba(59, 130, 246, 0.25) 100%) !important;
+    border: 1px solid rgba(139, 92, 246, 0.4) !important;
+    border-bottom-right-radius: 4px;
+    color: #ffffff;
+}
+
+/* AI chat bubble base */
+.chat-bubble.bot-bubble {
+    align-self: flex-start;
+    background: rgba(25, 28, 41, 0.7) !important;
+    backdrop-filter: blur(10px);
+    border-bottom-left-radius: 4px;
+    color: #e5e7eb;
+}
+
+/* Provider-specific glow borders */
+.chat-bubble.gemini-bot {
+    border-left: 4px solid #3b82f6 !important;
+    box-shadow: 0 4px 20px rgba(59, 130, 246, 0.08);
+}
+
+.chat-bubble.nvidia-bot {
+    border-left: 4px solid #76b900 !important;
+    box-shadow: 0 4px 20px rgba(118, 185, 0, 0.08);
+}
+
+.chat-bubble.openrouter-bot {
+    border-left: 4px solid #f97316 !important;
+    box-shadow: 0 4px 20px rgba(249, 115, 22, 0.08);
+}
+
+/* Bot Avatar Styling */
+.bot-avatar {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.25rem;
+    flex-shrink: 0;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+    border: 1px solid rgba(255,255,255,0.1);
+}
+
+.gemini-avatar {
+    background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
+}
+
+.nvidia-avatar {
+    background: linear-gradient(135deg, #14532d 0%, #76b900 100%);
+}
+
+.openrouter-avatar {
+    background: linear-gradient(135deg, #7c2d12 0%, #f97316 100%);
+}
+
+.user-avatar {
+    background: linear-gradient(135deg, #5b21b6 0%, #8b5cf6 100%);
+}
+
+/* Message Content Area */
+.message-content {
+    flex-grow: 1;
+    line-height: 1.6;
+    font-size: 0.98rem;
+    word-break: break-word;
+}
+
+.bot-name {
+    font-weight: 700;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 0.35rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.gemini-name { color: #60a5fa; }
+.nvidia-name { color: #a3e635; }
+.openrouter-name { color: #fb923c; }
+
+/* Custom Typing Shimmer Animation */
+.shimmer-text {
+    background: linear-gradient(90deg, #9ca3af 0%, #f3f4f6 50%, #9ca3af 100%);
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite linear;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+@keyframes shimmer {
+    0% { background-position: -200% 0; }
+    100% { background-position: 200% 0; }
+}
+
+/* Code block customization inside custom bubbles */
+.message-content pre {
+    background: rgba(10, 11, 16, 0.9) !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    border-radius: 8px !important;
+    padding: 1rem !important;
+    overflow-x: auto !important;
+}
+
+.message-content code {
+    font-family: 'Fira Code', 'Courier New', Courier, monospace !important;
+    font-size: 0.9rem !important;
+    background: rgba(255, 255, 255, 0.07);
+    padding: 0.15rem 0.35rem;
+    border-radius: 4px;
+}
+
+/* Mobile responsive fixes */
+@media (max-width: 768px) {
+    .chat-bubble {
+        max-width: 95%;
+        padding: 1rem;
+    }
+    
+    /* Ensure Streamlit elements render beautifully on mobile devices */
+    [data-testid="stSidebar"] {
+        background-color: #0a0b10 !important;
+        border-right: 1px solid rgba(255, 255, 255, 0.08) !important;
+    }
+
+    div[data-testid="stTab"] {
+        padding: 0.5rem 0.75rem !important;
+        font-size: 0.9rem !important;
+    }
+}
+
+/* Glow decoration */
+.glow-accent {
+    position: absolute;
+    width: 150px;
+    height: 150px;
+    background: radial-gradient(circle, rgba(139, 92, 246, 0.15) 0%, transparent 70%);
+    z-index: -1;
+    pointer-events: none;
+}
+
+/* Custom button states */
+.stButton>button {
+    background: linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%) !important;
+    color: white !important;
+    border: none !important;
+    border-radius: 8px !important;
+    padding: 0.5rem 1.5rem !important;
+    font-weight: 600 !important;
+    transition: all 0.2s ease !important;
+    box-shadow: 0 4px 12px rgba(139, 92, 246, 0.2) !important;
+}
+
+.stButton>button:hover {
+    transform: translateY(-2px) !important;
+    box-shadow: 0 6px 20px rgba(139, 92, 246, 0.35) !important;
+    filter: brightness(1.1) !important;
+}
+
+.stButton>button:active {
+    transform: translateY(0) !important;
+}
