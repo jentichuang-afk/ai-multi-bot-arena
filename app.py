@@ -6,6 +6,76 @@ import json
 import os
 import google_drive_sync
 
+def fetch_api_models(provider, api_keys):
+    """根據指定的 API 提供商與金鑰，動態拉取可用的模型清單"""
+    cache_key = f"models_cache_{provider}"
+    
+    # 優先從 session_state 快取讀取，避免重覆呼叫 API 造成延遲
+    if cache_key in st.session_state and st.session_state[cache_key]:
+        return st.session_state[cache_key]
+        
+    api_key = api_keys.get(provider, "")
+    
+    # OpenRouter：免金鑰即可公開拉取所有最新模型列表，非常友善！
+    if provider == "OpenRouter":
+        try:
+            import requests
+            response = requests.get("https://openrouter.ai/api/v1/models", timeout=4)
+            if response.status_code == 200:
+                data = response.json()
+                models = [m["id"] for m in data.get("data", [])]
+                # 篩選並將免費模型 (:free) 與常規熱門模型排序
+                free_models = sorted([m for m in models if ":free" in m])
+                other_models = sorted([m for m in models if ":free" not in m])
+                sorted_models = free_models + other_models
+                if sorted_models:
+                    st.session_state[cache_key] = sorted_models + ["自訂模型 ID..."]
+                    return st.session_state[cache_key]
+        except Exception:
+            pass
+            
+    # Gemini 與 Nvidia NIM 必須有 API Key 才能執行偵測
+    if not api_key:
+        defaults = {
+            "Google Gemini": ["gemini-1.5-flash", "gemini-1.5-pro", "gemini-2.0-flash-exp", "自訂模型 ID..."],
+            "Nvidia NIM": ["meta/llama-3.1-70b-instruct", "nvidia/llama-3-1-nemotron-70b-instruct", "meta/llama-3.1-8b-instruct", "自訂模型 ID..."]
+        }
+        return defaults.get(provider, ["自訂模型 ID..."])
+        
+    try:
+        if provider == "Google Gemini":
+            import google.generativeai as genai
+            genai.configure(api_key=api_key)
+            models = genai.list_models()
+            gemini_list = []
+            for m in models:
+                if "generateContent" in m.supported_generation_methods:
+                    name = m.name.replace("models/", "")
+                    gemini_list.append(name)
+            if gemini_list:
+                st.session_state[cache_key] = sorted(gemini_list) + ["自訂模型 ID..."]
+                return st.session_state[cache_key]
+                
+        elif provider == "Nvidia NIM":
+            from openai import OpenAI
+            client = OpenAI(api_key=api_key, base_url="https://integrate.api.nvidia.com/v1")
+            models = client.models.list()
+            nim_list = [m.id for m in models.data]
+            if nim_list:
+                st.session_state[cache_key] = sorted(nim_list) + ["自訂模型 ID..."]
+                return st.session_state[cache_key]
+                
+    except Exception as e:
+        st.toast(f"⚠️ 自動偵測 {provider} 模型失敗，使用預設清單: {str(e)}")
+        
+    # 失敗時的回退預設值
+    defaults = {
+        "Google Gemini": ["gemini-1.5-flash", "gemini-1.5-pro", "gemini-2.0-flash-exp", "自訂模型 ID..."],
+        "Nvidia NIM": ["meta/llama-3.1-70b-instruct", "nvidia/llama-3-1-nemotron-70b-instruct", "meta/llama-3.1-8b-instruct", "自訂模型 ID..."],
+        "OpenRouter": ["meta-llama/llama-3.1-8b-instruct:free", "google/gemma-2-9b-it:free", "自訂模型 ID..."]
+    }
+    return defaults.get(provider, ["自訂模型 ID..."])
+
 # ---------------------------------------------------------
 # 1. 頁面初始化與樣式載入
 # ---------------------------------------------------------
@@ -611,35 +681,14 @@ with main_tab2:
             new_provider = st.selectbox("API 提供商 (Provider)", ["Google Gemini", "Nvidia NIM", "OpenRouter"])
             new_emoji = st.text_input("代表頭像 (Emoji)", value="🤖", max_chars=2)
             
-        # 根據不同的 API 提供商提供對應的熱門模型下拉選單
-        provider_models = {
-            "Google Gemini": [
-                "gemini-1.5-flash",
-                "gemini-1.5-pro",
-                "gemini-2.0-flash-exp",
-                "自訂模型 ID..."
-            ],
-            "Nvidia NIM": [
-                "meta/llama-3.1-70b-instruct",
-                "nvidia/llama-3-1-nemotron-70b-instruct",
-                "meta/llama-3.1-8b-instruct",
-                "meta/llama-3.1-405b-instruct",
-                "自訂模型 ID..."
-            ],
-            "OpenRouter": [
-                "meta-llama/llama-3.1-8b-instruct:free",
-                "google/gemma-2-9b-it:free",
-                "mistralai/mistral-7b-instruct:free",
-                "qwen/qwen-2.5-7b-instruct:free",
-                "自訂模型 ID..."
-            ]
-        }
+        # 動態偵測 API 金鑰下可用的模型清單
+        api_keys = get_api_keys()
+        model_options = fetch_api_models(new_provider, api_keys)
         
         with col1:
             new_name = st.text_input("機器人名稱", placeholder="例如：程式碼導師 🧙‍♂️")
             
-            # 模型選擇下拉選單
-            model_options = provider_models.get(new_provider, ["自訂模型 ID..."])
+            # 模型選擇下拉選單 (自動偵測可用模型)
             selected_model_option = st.selectbox("選擇模型 ID (Model ID)", model_options)
             
             # 若使用者選取「自訂模型 ID...」，則顯示文字輸入欄位讓使用者自行填寫
