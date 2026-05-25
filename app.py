@@ -607,14 +607,51 @@ with main_tab2:
     
     with st.expander("✨ ➕ 新增自訂 AI 機器人", expanded=True):
         col1, col2, col3 = st.columns([2, 2, 1])
-        with col1:
-            new_name = st.text_input("機器人名稱", placeholder="例如：程式碼導師 🧙‍♂️")
-            new_model = st.text_input("模型 ID (Model ID)", placeholder="例如：gemini-1.5-pro")
         with col2:
             new_provider = st.selectbox("API 提供商 (Provider)", ["Google Gemini", "Nvidia NIM", "OpenRouter"])
             new_emoji = st.text_input("代表頭像 (Emoji)", value="🤖", max_chars=2)
+            
+        # 根據不同的 API 提供商提供對應的熱門模型下拉選單
+        provider_models = {
+            "Google Gemini": [
+                "gemini-1.5-flash",
+                "gemini-1.5-pro",
+                "gemini-2.0-flash-exp",
+                "自訂模型 ID..."
+            ],
+            "Nvidia NIM": [
+                "meta/llama-3.1-70b-instruct",
+                "nvidia/llama-3-1-nemotron-70b-instruct",
+                "meta/llama-3.1-8b-instruct",
+                "meta/llama-3.1-405b-instruct",
+                "自訂模型 ID..."
+            ],
+            "OpenRouter": [
+                "meta-llama/llama-3.1-8b-instruct:free",
+                "google/gemma-2-9b-it:free",
+                "mistralai/mistral-7b-instruct:free",
+                "qwen/qwen-2.5-7b-instruct:free",
+                "自訂模型 ID..."
+            ]
+        }
+        
+        with col1:
+            new_name = st.text_input("機器人名稱", placeholder="例如：程式碼導師 🧙‍♂️")
+            
+            # 模型選擇下拉選單
+            model_options = provider_models.get(new_provider, ["自訂模型 ID..."])
+            selected_model_option = st.selectbox("選擇模型 ID (Model ID)", model_options)
+            
+            # 若使用者選取「自訂模型 ID...」，則顯示文字輸入欄位讓使用者自行填寫
+            if selected_model_option == "自訂模型 ID...":
+                new_model = st.text_input("請輸入自訂模型 ID", placeholder="例如：meta-llama/llama-3.3-70b-instruct")
+            else:
+                new_model = selected_model_option
+                
         with col3:
             st.markdown("<br>", unsafe_allow_html=True)
+            if selected_model_option == "自訂模型 ID...":
+                st.markdown("<br><br>", unsafe_allow_html=True)
             add_submitted = st.button("➕ 新增機器人", use_container_width=True)
             
         new_prompt = st.text_area(
