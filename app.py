@@ -150,32 +150,18 @@ if "google_auto_sync" not in st.session_state:
 # 3. API Keys & Google OAuth 設定管理
 # ---------------------------------------------------------
 def get_api_keys():
-    keys = {
+    return {
         "Google Gemini": st.secrets.get("GEMINI_API_KEY", ""),
         "Nvidia NIM": st.secrets.get("NVIDIA_API_KEY", ""),
         "OpenRouter": st.secrets.get("OPENROUTER_API_KEY", "")
     }
-    if "sidebar_gemini_key" in st.session_state and st.session_state.sidebar_gemini_key:
-        keys["Google Gemini"] = st.session_state.sidebar_gemini_key
-    if "sidebar_nvidia_key" in st.session_state and st.session_state.sidebar_nvidia_key:
-        keys["Nvidia NIM"] = st.session_state.sidebar_nvidia_key
-    if "sidebar_openrouter_key" in st.session_state and st.session_state.sidebar_openrouter_key:
-        keys["OpenRouter"] = st.session_state.sidebar_openrouter_key
-    return keys
 
 def get_google_oauth_config():
-    config = {
+    return {
         "client_id": st.secrets.get("GOOGLE_CLIENT_ID", ""),
         "client_secret": st.secrets.get("GOOGLE_CLIENT_SECRET", ""),
         "redirect_uri": st.secrets.get("GOOGLE_REDIRECT_URI", "")
     }
-    if "sidebar_google_client_id" in st.session_state and st.session_state.sidebar_google_client_id:
-        config["client_id"] = st.session_state.sidebar_google_client_id
-    if "sidebar_google_client_secret" in st.session_state and st.session_state.sidebar_google_client_secret:
-        config["client_secret"] = st.session_state.sidebar_google_client_secret
-    if "sidebar_google_redirect_uri" in st.session_state and st.session_state.sidebar_google_redirect_uri:
-        config["redirect_uri"] = st.session_state.sidebar_google_redirect_uri
-    return config
 
 # ---------------------------------------------------------
 # 4. Google Drive 雲端同步觸發器 (Cloud Sync Helpers)
@@ -321,57 +307,7 @@ with st.sidebar:
             else:
                 st.error("登入連結產生失敗。")
         else:
-            st.info("💡 請先在下方 Google 憑證設定中，填寫 Client ID 與 Secret 以啟用 Google 登入功能。")
-
-    st.markdown("---")
-    st.markdown("## ⚙️ AI 背景設定中心")
-    
-    # 展開摺疊面板：AI API Keys
-    keys = get_api_keys()
-    with st.expander("🔑 API 金鑰配置 (API Keys)", expanded=False):
-        st.session_state.sidebar_gemini_key = st.text_input(
-            "Google Gemini API Key",
-            value=st.session_state.get("sidebar_gemini_key", keys["Google Gemini"]),
-            type="password",
-            placeholder="請輸入 Gemini API Key..."
-        )
-        st.caption("🟢 Gemini：已設定" if keys["Google Gemini"] else "🔴 Gemini：尚未設定")
-            
-        st.session_state.sidebar_nvidia_key = st.text_input(
-            "Nvidia NIM API Key",
-            value=st.session_state.get("sidebar_nvidia_key", keys["Nvidia NIM"]),
-            type="password",
-            placeholder="請輸入 Nvidia NIM API Key..."
-        )
-        st.caption("🟢 Nvidia NIM：已設定" if keys["Nvidia NIM"] else "🔴 Nvidia NIM：尚未設定")
-            
-        st.session_state.sidebar_openrouter_key = st.text_input(
-            "OpenRouter API Key",
-            value=st.session_state.get("sidebar_openrouter_key", keys["OpenRouter"]),
-            type="password",
-            placeholder="請輸入 OpenRouter API Key..."
-        )
-        st.caption("🟢 OpenRouter：已設定" if keys["OpenRouter"] else "🔴 OpenRouter：尚未設定")
-
-    # 展開摺疊面板：Google OAuth2 Credentials
-    with st.expander("🛡️ Google 雲端登入憑證", expanded=False):
-        st.session_state.sidebar_google_client_id = st.text_input(
-            "Google Client ID",
-            value=st.session_state.get("sidebar_google_client_id", oauth_config["client_id"]),
-            placeholder="請貼上 Google OAuth Client ID..."
-        )
-        st.session_state.sidebar_google_client_secret = st.text_input(
-            "Google Client Secret",
-            value=st.session_state.get("sidebar_google_client_secret", oauth_config["client_secret"]),
-            type="password",
-            placeholder="請貼上 Google OAuth Client Secret..."
-        )
-        st.session_state.sidebar_google_redirect_uri = st.text_input(
-            "Redirect URI (重新導向網址)",
-            value=st.session_state.get("sidebar_google_redirect_uri", oauth_config["redirect_uri"] if oauth_config["redirect_uri"] else "http://localhost:8501/"),
-            placeholder="例如 http://localhost:8501/"
-        )
-        st.caption("若在此填寫，將會覆寫 Streamlit Cloud Secrets 的設定值。")
+            st.warning("⚠️ 請在 Streamlit Secrets 設定您的 Google 登入憑證 (GOOGLE_CLIENT_ID / GOOGLE_CLIENT_SECRET) 以啟用雲端同步！")
 
     # 快速勾選要啟用的機器人
     st.markdown("### 🤖 啟用對話的機器人")
