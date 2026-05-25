@@ -151,16 +151,16 @@ if "google_auto_sync" not in st.session_state:
 # ---------------------------------------------------------
 def get_api_keys():
     return {
-        "Google Gemini": st.secrets.get("GEMINI_API_KEY", ""),
-        "Nvidia NIM": st.secrets.get("NVIDIA_API_KEY", ""),
-        "OpenRouter": st.secrets.get("OPENROUTER_API_KEY", "")
+        "Google Gemini": st.secrets.get("GEMINI_API_KEY") or st.secrets.get("gemini_api_key", ""),
+        "Nvidia NIM": st.secrets.get("NVIDIA_API_KEY") or st.secrets.get("nvidia_api_key", ""),
+        "OpenRouter": st.secrets.get("OPENROUTER_API_KEY") or st.secrets.get("openrouter_api_key", "")
     }
 
 def get_google_oauth_config():
     return {
-        "client_id": st.secrets.get("GOOGLE_CLIENT_ID", ""),
-        "client_secret": st.secrets.get("GOOGLE_CLIENT_SECRET", ""),
-        "redirect_uri": st.secrets.get("GOOGLE_REDIRECT_URI", "")
+        "client_id": st.secrets.get("GOOGLE_CLIENT_ID") or st.secrets.get("google_client_id", ""),
+        "client_secret": st.secrets.get("GOOGLE_CLIENT_SECRET") or st.secrets.get("google_client_secret", ""),
+        "redirect_uri": st.secrets.get("GOOGLE_REDIRECT_URI") or st.secrets.get("google_redirect_uri", "")
     }
 
 # ---------------------------------------------------------
